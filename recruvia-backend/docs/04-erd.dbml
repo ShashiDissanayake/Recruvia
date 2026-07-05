@@ -1,0 +1,388 @@
+//////////////////////////////////////////////////////////////
+// Recruvia ER Diagram (DBML)
+// Version : 1.0
+// Database: PostgreSQL
+// ORM     : Spring Data JPA (Hibernate)
+//////////////////////////////////////////////////////////////
+
+Project Recruvia {
+  database_type: "PostgreSQL"
+  Note: "AI-Powered Recruitment & Resume Screening Platform"
+}
+
+//////////////////////////////////////////////////////////////
+// ENUMS
+//////////////////////////////////////////////////////////////
+
+Enum AccountStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+Enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERN
+  FREELANCE
+}
+
+Enum JobStatus {
+  DRAFT
+  OPEN
+  CLOSED
+}
+
+Enum ProficiencyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+Enum ApplicationStatus {
+  PENDING
+  REVIEWING
+  SHORTLISTED
+  INTERVIEW
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+Enum InterviewStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+}
+
+Enum NotificationType {
+  EMAIL
+  SYSTEM
+  APPLICATION
+  INTERVIEW
+}
+
+//////////////////////////////////////////////////////////////
+// TABLES
+//////////////////////////////////////////////////////////////
+
+Table roles {
+
+  id uuid [pk]
+
+  name varchar(50) [not null, unique]
+
+  description varchar(255)
+
+  created_at timestamp
+
+}
+
+//////////////////////////////////////////////////////////////
+
+Table users {
+
+  id uuid [pk]
+
+  role_id uuid [not null]
+
+  first_name varchar(100) [not null]
+
+  last_name varchar(100) [not null]
+
+  email varchar(255) [not null, unique]
+
+  password varchar(255) [not null]
+
+  phone varchar(20)
+
+  profile_image varchar(500)
+
+  account_status AccountStatus [not null, default: 'ACTIVE']
+
+  email_verified boolean [not null, default: false]
+
+  last_login timestamp
+
+  created_at timestamp
+
+  updated_at timestamp
+
+}
+
+//////////////////////////////////////////////////////////////
+
+Table companies {
+
+  id uuid [pk]
+
+  recruiter_id uuid [not null]
+
+  company_name varchar(255) [not null, unique]
+
+  description text
+
+  website varchar(255)
+
+  logo_url varchar(500)
+
+  industry varchar(100)
+
+  location varchar(255)
+
+  company_size varchar(50)
+
+  created_at timestamp
+
+  updated_at timestamp
+
+}
+
+//////////////////////////////////////////////////////////////
+
+Table jobs {
+
+  id uuid [pk]
+
+  company_id uuid [not null]
+
+  title varchar(255) [not null]
+
+  description text [not null]
+
+  employment_type EmploymentType [not null]
+
+  experience_level varchar(30)
+
+  salary_min decimal(10,2)
+
+  salary_max decimal(10,2)
+
+  location varchar(255)
+
+  application_deadline date
+
+  status JobStatus [not null, default: 'OPEN']
+
+  created_at timestamp
+
+  updated_at timestamp
+
+}
+
+//////////////////////////////////////////////////////////////
+
+Table resumes {
+
+  id uuid [pk]
+
+  user_id uuid [not null]
+
+  file_name varchar(255) [not null]
+
+  file_url varchar(500) [not null]
+
+  file_type varchar(20) [not null]
+
+  file_size bigint [not null]
+
+  summary text
+
+  ai_processed boolean [not null, default: false]
+
+  is_active boolean [not null, default: true]
+
+  uploaded_at timestamp
+
+}
+
+//////////////////////////////////////////////////////////////
+
+Table skills {
+
+  id uuid [pk]
+
+  name varchar(100) [not null, unique]
+
+  category varchar(100)
+
+  created_at timestamp
+
+}
+
+//////////////////////////////////////////////////////////////
+
+Table user_skills {
+
+  id uuid [pk]
+
+  user_id uuid [not null]
+
+  skill_id uuid [not null]
+
+  proficiency_level ProficiencyLevel
+
+  years_of_experience decimal(4,1)
+
+  Indexes {
+    (user_id, skill_id) [unique]
+  }
+
+}
+
+//////////////////////////////////////////////////////////////
+
+Table job_skills {
+
+  id uuid [pk]
+
+  job_id uuid [not null]
+
+  skill_id uuid [not null]
+
+  required boolean [not null, default: true]
+
+  Indexes {
+    (job_id, skill_id) [unique]
+  }
+
+}
+
+//////////////////////////////////////////////////////////////
+
+Table applications {
+
+  id uuid [pk]
+
+  job_id uuid [not null]
+
+  user_id uuid [not null]
+
+  resume_id uuid [not null]
+
+  application_status ApplicationStatus [not null, default: 'PENDING']
+
+  ai_match_score decimal(5,2)
+
+  applied_at timestamp
+
+  Indexes {
+    (job_id, user_id) [unique]
+  }
+
+}
+
+//////////////////////////////////////////////////////////////
+
+Table interviews {
+
+  id uuid [pk]
+
+  application_id uuid [not null, unique]
+
+  meeting_link varchar(500)
+
+  scheduled_at timestamp
+
+  interview_status InterviewStatus [not null, default: 'SCHEDULED']
+
+  notes text
+
+  created_at timestamp
+
+}
+
+//////////////////////////////////////////////////////////////
+
+Table notifications {
+
+  id uuid [pk]
+
+  user_id uuid [not null]
+
+  title varchar(255) [not null]
+
+  message text [not null]
+
+  notification_type NotificationType [not null]
+
+  is_read boolean [not null, default: false]
+
+  created_at timestamp
+
+}
+
+//////////////////////////////////////////////////////////////
+
+Table refresh_tokens {
+
+  id uuid [pk]
+
+  user_id uuid [not null, unique]
+
+  token varchar(500) [not null, unique]
+
+  expires_at timestamp [not null]
+
+  revoked boolean [not null, default: false]
+
+  created_at timestamp
+
+}
+
+//////////////////////////////////////////////////////////////
+
+Table audit_logs {
+
+  id uuid [pk]
+
+  user_id uuid
+
+  action varchar(255) [not null]
+
+  entity_name varchar(100) [not null]
+
+  entity_id uuid
+
+  ip_address varchar(50)
+
+  created_at timestamp
+
+}
+
+//////////////////////////////////////////////////////////////
+// RELATIONSHIPS
+//////////////////////////////////////////////////////////////
+
+Ref: roles.id < users.role_id
+
+Ref: users.id < companies.recruiter_id
+
+Ref: companies.id < jobs.company_id
+
+Ref: users.id < resumes.user_id
+
+Ref: users.id < user_skills.user_id
+
+Ref: skills.id < user_skills.skill_id
+
+Ref: jobs.id < job_skills.job_id
+
+Ref: skills.id < job_skills.skill_id
+
+Ref: users.id < applications.user_id
+
+Ref: jobs.id < applications.job_id
+
+Ref: resumes.id < applications.resume_id
+
+Ref: applications.id - interviews.application_id
+
+Ref: users.id < notifications.user_id
+
+Ref: users.id - refresh_tokens.user_id
+
+Ref: users.id < audit_logs.user_id
