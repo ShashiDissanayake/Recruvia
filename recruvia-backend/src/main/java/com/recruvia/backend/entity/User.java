@@ -26,6 +26,9 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Resume> resumes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Application> applications = new ArrayList<>();
+
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
 

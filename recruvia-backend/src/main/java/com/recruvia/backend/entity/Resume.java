@@ -1,15 +1,13 @@
 package com.recruvia.backend.entity;
 
 import com.recruvia.backend.entity.base.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,6 +19,9 @@ public class Resume extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "resume", fetch = FetchType.LAZY)
+    private List<Application> applications = new ArrayList<>();
 
     @Column(name = "file_name", nullable = false, length = 255)
     private String fileName;
