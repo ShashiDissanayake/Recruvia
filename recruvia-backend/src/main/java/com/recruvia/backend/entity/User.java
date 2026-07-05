@@ -29,6 +29,17 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Application> applications = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Notification> notifications = new ArrayList<>();
+
+    @OneToOne(mappedBy = "user",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY)
+    private RefreshToken refreshToken;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<AuditLog> auditLogs = new ArrayList<>();
+
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
 
