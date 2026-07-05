@@ -1,4 +1,35 @@
 package com.recruvia.backend.entity;
 
-public class JobSkill {
+import com.recruvia.backend.entity.base.BaseEntity;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@Entity
+@Table(
+        name = "job_skills",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_job_skill",
+                        columnNames = {"job_id", "skill_id"}
+                )
+        }
+)
+public class JobSkill extends BaseEntity {
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_id", nullable = false)
+    private Job job;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "skill_id", nullable = false)
+    private Skill skill;
+
+    @Column(nullable = false)
+    private Boolean required = true;
+
 }
