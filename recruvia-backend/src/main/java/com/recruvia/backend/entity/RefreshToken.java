@@ -5,15 +5,19 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "refresh_tokens")
 public class RefreshToken extends BaseEntity {
@@ -21,6 +25,8 @@ public class RefreshToken extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     @NotNull(message = "User is required.")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User user;
 
     @NotBlank(message = "Token is required.")
@@ -30,9 +36,11 @@ public class RefreshToken extends BaseEntity {
 
     @NotNull(message = "Expiration date is required.")
     @Column(name = "expires_at", nullable = false)
+    @ToString.Include
     private LocalDateTime expiresAt;
 
     @Column(nullable = false)
+    @ToString.Include
     private Boolean revoked = false;
 
 }
