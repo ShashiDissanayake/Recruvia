@@ -3,6 +3,8 @@ package com.recruvia.backend.entity;
 import com.recruvia.backend.entity.base.BaseEntity;
 import com.recruvia.backend.enums.ApplicationStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,20 +28,25 @@ public class Application extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_id", nullable = false)
+    @NotNull(message = "Job is required.")
     private Job job;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @NotNull(message = "Candidate is required.")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "resume_id", nullable = false)
+    @NotNull(message = "Resume is required.")
     private Resume resume;
 
+    @NotNull(message = "Application status is required.")
     @Enumerated(EnumType.STRING)
     @Column(name = "application_status", nullable = false)
     private ApplicationStatus applicationStatus = ApplicationStatus.PENDING;
 
+    @PositiveOrZero(message = "Match score cannot be negative.")
     @Column(name = "ai_match_score", precision = 5, scale = 2)
     private BigDecimal aiMatchScore;
 
