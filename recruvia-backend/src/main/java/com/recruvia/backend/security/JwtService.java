@@ -114,4 +114,7 @@ public class JwtService {
                 .before(new Date());
     }
 
+    public long getAccessTokenExpiration() {
+        return accessTokenExpiration;
+    }
 }

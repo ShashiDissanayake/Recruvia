@@ -1,4 +1,4 @@
-package com.recruvia.backend.common.constant;
+package com.recruvia.backend.common.constants;
 
 public final class ApiMessages {
 
@@ -23,6 +23,9 @@ public final class ApiMessages {
 
     public static final String EMAIL_VERIFIED =
             "Email verified successfully.";
+
+    public static final String PASSWORD_RESET_EMAIL_SENT =
+            "Password reset instructions have been sent to your email.";
 
     public static final String PASSWORD_RESET_SUCCESS =
             "Password reset successfully.";
@@ -77,5 +80,4 @@ public final class ApiMessages {
      */
     public static final String INTERVIEW_SCHEDULED =
             "Interview scheduled successfully.";
-
 }

@@ -110,7 +110,8 @@ public class SecurityConfig {
                 "PUT",
                 "PATCH",
                 "DELETE",
-                "OPTIONS"
+                "OPTIONS",
+                "HEAD"
         ));
 
         configuration.setAllowedHeaders(List.of(
@@ -120,7 +121,9 @@ public class SecurityConfig {
         ));
 
         configuration.setExposedHeaders(List.of(
-                "Authorization"
+                "Authorization",
+                "Cache-Control",
+                "Content-Disposition"
         ));
 
         configuration.setAllowCredentials(true);
