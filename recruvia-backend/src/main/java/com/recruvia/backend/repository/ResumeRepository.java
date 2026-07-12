@@ -12,6 +12,6 @@ public interface ResumeRepository extends JpaRepository<Resume, UUID> {
 
     List<Resume> findByUser(User user);
 
-    Optional<Resume> findByUserAndIsActiveTrue(User user);
+    Optional<Resume> findByUserAndActiveTrue(User user);
 
 }

@@ -18,6 +18,6 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
 
     Optional<Application> findByUserAndJob(User user, Job job);
 
-    List<Application> findByStatus(ApplicationStatus status);
+    List<Application> findByApplicationStatus(ApplicationStatus status);
 
 }
