@@ -12,6 +12,6 @@ public interface InterviewRepository extends JpaRepository<Interview, UUID> {
 
     List<Interview> findByApplication(Application application);
 
-    List<Interview> findByStatus(InterviewStatus status);
+    List<Interview> findByInterviewStatus(InterviewStatus status);
 
 }

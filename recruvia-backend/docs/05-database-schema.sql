@@ -17,6 +17,8 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 DROP TABLE IF EXISTS audit_logs CASCADE;
 DROP TABLE IF EXISTS refresh_tokens CASCADE;
+DROP TABLE IF EXISTS email_verification_tokens CASCADE;
+DROP TABLE IF EXISTS password_reset_tokens CASCADE;
 DROP TABLE IF EXISTS notifications CASCADE;
 DROP TABLE IF EXISTS interviews CASCADE;
 DROP TABLE IF EXISTS applications CASCADE;
@@ -532,6 +534,58 @@ CREATE TABLE refresh_tokens
 );
 
 -- =============================================================================
+-- TABLE : email_verification_tokens
+-- =============================================================================
+
+CREATE TABLE email_verification_tokens
+(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    user_id UUID NOT NULL UNIQUE,
+
+    token VARCHAR(500)
+                 NOT NULL
+        UNIQUE,
+
+    expires_at TIMESTAMP NOT NULL,
+
+    created_at TIMESTAMP
+        NOT NULL
+                        DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_email_verification_token_user
+        FOREIGN KEY (user_id)
+            REFERENCES users(id)
+            ON DELETE CASCADE
+);
+
+-- =============================================================================
+-- TABLE : password_reset_tokens
+-- =============================================================================
+
+CREATE TABLE password_reset_tokens
+(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    user_id UUID NOT NULL UNIQUE,
+
+    token VARCHAR(500)
+                 NOT NULL
+        UNIQUE,
+
+    expires_at TIMESTAMP NOT NULL,
+
+    created_at TIMESTAMP
+        NOT NULL
+                        DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_password_reset_token_user
+        FOREIGN KEY (user_id)
+            REFERENCES users(id)
+            ON DELETE CASCADE
+);
+
+-- =============================================================================
 -- TABLE : audit_logs
 -- =============================================================================
 
@@ -651,6 +705,18 @@ CREATE INDEX idx_refresh_tokens_user
 CREATE INDEX idx_refresh_tokens_expiry
     ON refresh_tokens(expires_at);
 
+CREATE INDEX idx_email_verification_tokens_user
+    ON email_verification_tokens(user_id);
+
+CREATE INDEX idx_email_verification_tokens_expiry
+    ON email_verification_tokens(expires_at);
+
+CREATE INDEX idx_password_reset_tokens_user
+    ON password_reset_tokens(user_id);
+
+CREATE INDEX idx_password_reset_tokens_expiry
+    ON password_reset_tokens(expires_at);
+
 CREATE INDEX idx_audit_logs_user
     ON audit_logs(user_id);
 
@@ -699,6 +765,12 @@ COMMENT ON TABLE notifications IS
 
 COMMENT ON TABLE refresh_tokens IS
 'Stores JWT refresh tokens.';
+
+COMMENT ON TABLE email_verification_tokens IS
+'Stores email verification tokens.';
+
+COMMENT ON TABLE password_reset_tokens IS
+'Stores password reset tokens.';
 
 COMMENT ON TABLE audit_logs IS
 'Stores security and audit events.';
@@ -752,7 +824,7 @@ Summary
 ✓ PostgreSQL Extension Enabled
 ✓ UUID Primary Keys
 ✓ ENUM Types
-✓ 13 Database Tables
+✓ 15 Database Tables
 ✓ Primary Keys
 ✓ Foreign Keys
 ✓ Composite Unique Constraints
@@ -776,7 +848,9 @@ Database Objects
 10. interviews
 11. notifications
 12. refresh_tokens
-13. audit_logs
+13. email_verification_tokens
+14. password_reset_tokens
+15. audit_logs
 
 ===============================================================================
 END OF FILE
