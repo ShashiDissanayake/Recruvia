@@ -272,7 +272,9 @@ public class AuthServiceImpl implements AuthService {
                 .getContext()
                 .getAuthentication();
 
-        if (authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
+        if (authentication == null ||
+                !(authentication.getPrincipal() instanceof CustomUserDetails userDetails)) {
+
             throw new BadRequestException("No authenticated user found.");
         }
 
@@ -281,7 +283,15 @@ public class AuthServiceImpl implements AuthService {
                         new ResourceNotFoundException(ErrorMessages.USER_NOT_FOUND)
                 );
 
-        refreshTokenRepository.deleteByUser(user);
+        RefreshToken refreshToken = refreshTokenRepository
+                .findByUser(user)
+                .orElseThrow(() ->
+                        new InvalidTokenException(ErrorMessages.INVALID_REFRESH_TOKEN)
+                );
+
+        refreshToken.setRevoked(true);
+
+        refreshTokenRepository.save(refreshToken);
 
         SecurityContextHolder.clearContext();
     }
