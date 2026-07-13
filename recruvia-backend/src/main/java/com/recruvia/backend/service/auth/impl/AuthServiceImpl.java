@@ -8,7 +8,9 @@ import com.recruvia.backend.dto.auth.RefreshTokenRequest;
 import com.recruvia.backend.dto.auth.RegisterRequest;
 import com.recruvia.backend.dto.auth.ResetPasswordRequest;
 import com.recruvia.backend.dto.auth.VerifyEmailRequest;
+import com.recruvia.backend.entity.AuditLog;
 import com.recruvia.backend.entity.EmailVerificationToken;
+import com.recruvia.backend.entity.NotificationPreference;
 import com.recruvia.backend.entity.PasswordResetToken;
 import com.recruvia.backend.entity.RefreshToken;
 import com.recruvia.backend.entity.Role;
@@ -19,7 +21,9 @@ import com.recruvia.backend.exception.InvalidTokenException;
 import com.recruvia.backend.exception.ResourceNotFoundException;
 import com.recruvia.backend.mapper.AuthMapper;
 import com.recruvia.backend.mapper.UserMapper;
+import com.recruvia.backend.repository.AuditLogRepository;
 import com.recruvia.backend.repository.EmailVerificationTokenRepository;
+import com.recruvia.backend.repository.NotificationPreferenceRepository;
 import com.recruvia.backend.repository.PasswordResetTokenRepository;
 import com.recruvia.backend.repository.RefreshTokenRepository;
 import com.recruvia.backend.repository.RoleRepository;
@@ -28,6 +32,7 @@ import com.recruvia.backend.security.CustomUserDetails;
 import com.recruvia.backend.security.JwtService;
 import com.recruvia.backend.service.auth.AuthService;
 import com.recruvia.backend.service.mail.MailService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,6 +42,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -55,6 +62,8 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final AuditLogRepository auditLogRepository;
+    private final NotificationPreferenceRepository notificationPreferenceRepository;
 
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
@@ -181,6 +190,39 @@ public class AuthServiceImpl implements AuthService {
         return refreshToken;
     }
 
+    private void recordAuditLog(User user, String action, String status) {
+        try {
+            ServletRequestAttributes attrs =
+                    (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+
+            String ipAddress = null;
+            String userAgent = null;
+
+            if (attrs != null) {
+                HttpServletRequest req = attrs.getRequest();
+                ipAddress = req.getHeader("X-Forwarded-For");
+                if (ipAddress == null || ipAddress.isBlank()) {
+                    ipAddress = req.getRemoteAddr();
+                }
+                userAgent = req.getHeader("User-Agent");
+            }
+
+            AuditLog log = new AuditLog();
+            log.setUser(user);
+            log.setAction(action);
+            log.setEntityName("User");
+            log.setEntityId(user.getId());
+            log.setIpAddress(ipAddress);
+            log.setUserAgent(userAgent != null && userAgent.length() > 500
+                    ? userAgent.substring(0, 500) : userAgent);
+            log.setStatus(status);
+
+            auditLogRepository.save(log);
+        } catch (Exception ex) {
+            // Audit log failure must not break the main flow
+        }
+    }
+
     @Override
     public AuthResponse register(RegisterRequest request) {
 
@@ -201,6 +243,11 @@ public class AuthServiceImpl implements AuthService {
         user.setEmailVerified(false);
 
         User savedUser = userRepository.save(user);
+
+        // Initialize default notification preferences for new user
+        NotificationPreference preference = new NotificationPreference();
+        preference.setUser(savedUser);
+        notificationPreferenceRepository.save(preference);
 
         // Generate email verification token and send verification email
         EmailVerificationToken verificationToken = createOrUpdateEmailVerificationToken(savedUser);
@@ -237,6 +284,9 @@ public class AuthServiceImpl implements AuthService {
         user.setLastLogin(LocalDateTime.now());
 
         User updatedUser = userRepository.save(user);
+
+        // Record successful login in audit log
+        recordAuditLog(updatedUser, "LOGIN_SUCCESS", "SUCCESS");
 
         RefreshToken refreshToken = createOrUpdateRefreshToken(updatedUser);
 
