@@ -27,7 +27,9 @@ public record UserResponse(
 
         LocalDateTime lastLogin,
 
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+
+        LocalDateTime updatedAt
 
 ) {
 }

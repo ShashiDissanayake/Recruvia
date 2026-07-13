@@ -23,6 +23,7 @@ public interface UserMapper {
     @Mapping(target = "accountStatus", ignore = true)
     @Mapping(target = "emailVerified", ignore = true)
     @Mapping(target = "lastLogin", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
 
     @Mapping(target = "companies", ignore = true)
     @Mapping(target = "resumes", ignore = true)
@@ -31,6 +32,7 @@ public interface UserMapper {
     @Mapping(target = "notifications", ignore = true)
     @Mapping(target = "refreshToken", ignore = true)
     @Mapping(target = "auditLogs", ignore = true)
+    @Mapping(target = "notificationPreference", ignore = true)
 
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
