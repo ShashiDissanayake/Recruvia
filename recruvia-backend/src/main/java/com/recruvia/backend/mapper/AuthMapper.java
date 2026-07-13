@@ -25,6 +25,8 @@ public interface AuthMapper {
 
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "notificationPreference", ignore = true)
 
     User toEntity(RegisterRequest request);
 
