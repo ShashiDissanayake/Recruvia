@@ -13,6 +13,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,6 +27,8 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "users")
+@SQLDelete(sql = "UPDATE users SET deleted = true, email = concat(email, '.deleted.', gen_random_uuid()) WHERE id = ?")
+@SQLRestriction("deleted = false")
 public class User extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -116,5 +120,13 @@ public class User extends BaseEntity {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<AuditLog> auditLogs = new ArrayList<>();
+
+    @Column(nullable = false)
+    private boolean deleted = false;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private NotificationPreference notificationPreference;
 
 }

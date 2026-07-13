@@ -133,6 +133,10 @@ CREATE TABLE users
 
     last_login TIMESTAMP,
 
+    deleted BOOLEAN
+        NOT NULL
+                        DEFAULT FALSE,
+
     created_at TIMESTAMP
         NOT NULL
                         DEFAULT CURRENT_TIMESTAMP,
@@ -146,6 +150,47 @@ CREATE TABLE users
             REFERENCES roles(id)
             ON DELETE RESTRICT
 );
+
+-- =============================================================================
+-- TABLE : notification_preferences
+-- =============================================================================
+
+CREATE TABLE notification_preferences
+(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    user_id UUID NOT NULL UNIQUE,
+
+    email_notifications BOOLEAN
+        NOT NULL
+                        DEFAULT TRUE,
+
+    interview_notifications BOOLEAN
+        NOT NULL
+                        DEFAULT TRUE,
+
+    job_recommendation_notifications BOOLEAN
+        NOT NULL
+                        DEFAULT TRUE,
+
+    marketing_emails BOOLEAN
+        NOT NULL
+                        DEFAULT FALSE,
+
+    created_at TIMESTAMP
+        NOT NULL
+                        DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP
+        NOT NULL
+                        DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_notification_preferences_user
+        FOREIGN KEY (user_id)
+            REFERENCES users(id)
+            ON DELETE CASCADE
+);
+
 
 -- =============================================================================
 -- TABLE : companies
@@ -602,6 +647,10 @@ CREATE TABLE audit_logs
     entity_id UUID,
 
     ip_address VARCHAR(50),
+
+    user_agent VARCHAR(500),
+
+    status VARCHAR(50),
 
     created_at TIMESTAMP
         NOT NULL

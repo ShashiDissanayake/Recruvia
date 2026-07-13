@@ -48,4 +48,14 @@ public class AuditLog extends BaseEntity {
     @ToString.Include
     private String ipAddress;
 
+    @Size(max = 500)
+    @Column(name = "user_agent", length = 500)
+    @ToString.Include
+    private String userAgent;
+
+    @Size(max = 50)
+    @Column(length = 50)
+    @ToString.Include
+    private String status;
+
 }
